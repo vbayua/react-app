@@ -26,6 +26,7 @@ function App() {
   const [notes, setNotes] = useState([])
   const [newNote, setNewNote] = useState({content: ''})
   const [showAll, setNoteFilter] = useState(true)
+  const [search, setSearch] = useState('')
   
   useEffect(() => {
     noteService
@@ -35,11 +36,18 @@ function App() {
       })
   }, [])
 
+  useEffect(() => {
+    const filtered = notes.filter(note => 
+      note.content.toLowerCase().includes(search.toLowerCase())
+    )
+    setNotes(filtered)
+  }, [search, notes])
+
   const saveNote = (e) => {
     e.preventDefault()
     const noteId = notes.length + 1
     const noteObject = {
-      content: newNote.content,
+      content: newNote.content.toString(),
       important: Math.random < 0.5,
       id: noteId.toString()
     } 
@@ -57,6 +65,11 @@ function App() {
     setNewNote({
       [e.target.name] : [e.target.value]
     })
+  }
+
+  const handleSearchChange = (e) => {
+    const search = e.target.value
+    setSearch(search)
   }
 
   const filterImportant = () => {
@@ -78,14 +91,28 @@ function App() {
         console.log(`note is already deleted : ${error}`)
       })
   }
+
   return (
     <>
+      <form>
+        <label>
+          <input 
+            type="text"
+            name='search'
+            value={search}
+            placeholder='Search content'
+            onChange={handleSearchChange}
+          />
+        </label>
+        <button type='submit'>save</button>
+      </form>
       <form onSubmit={saveNote} >
         <label>
           <input 
             type="text"
             name='content'
             value={newNote.content}
+            placeholder='Insert new note'
             onChange={handleInputContentChange}
           />
         </label>

@@ -27,7 +27,7 @@ function App() {
   const [newNote, setNewNote] = useState({content: ''})
   const [showAll, setNoteFilter] = useState(true)
   const [search, setSearch] = useState('')
-  
+    
   useEffect(() => {
     noteService
       .getAll()
@@ -37,11 +37,17 @@ function App() {
   }, [])
 
   useEffect(() => {
-    const filtered = notes.filter(note => 
-      note.content.toLowerCase().includes(search.toLowerCase())
-    )
-    setNotes(filtered)
-  }, [search, notes])
+    const fetchData = async () => {
+      try {
+        const response = await noteService.getAll(search)
+        setNotes(response)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [search])
 
   const saveNote = (e) => {
     e.preventDefault()
@@ -68,15 +74,22 @@ function App() {
   }
 
   const handleSearchChange = (e) => {
-    const search = e.target.value
-    setSearch(search)
+    let query = e.target.value
+    setSearch(query)
+  }
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    noteService.getAll(search).then(response => 
+      setNotes(response)
+    )
   }
 
   const filterImportant = () => {
     setNoteFilter(!showAll)
   }
   
-  const notesToShow = showAll ? notes : notes.filter(note => note.important)
+  const notesToShow = showAll ? notes : notes.filter(note => note.important === true)
 
   const toggleImportanceOf = id => {
     const note = notes.find(n => n.id === id)
@@ -88,13 +101,13 @@ function App() {
         setNewNote('')
       })
       .catch(error => {
-        console.log(`note is already deleted : ${error}`)
+        alert(`note is already deleted : ${error}`)
       })
   }
 
   return (
     <>
-      <form>
+      <form onSubmit={handleSearchSubmit}>
         <label>
           <input 
             type="text"
@@ -106,6 +119,7 @@ function App() {
         </label>
         <button type='submit'>save</button>
       </form>
+
       <form onSubmit={saveNote} >
         <label>
           <input 
@@ -116,7 +130,7 @@ function App() {
             onChange={handleInputContentChange}
           />
         </label>
-        <button type='submit'>save</button>
+        <button type='submit'>search</button>
       </form>
       <h1>Notes</h1>
       <div>

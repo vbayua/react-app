@@ -1,8 +1,10 @@
 import axios from "axios"
-const baseUrl = 'http://localhost:3001/api/notes'
+const baseUrl = '/api/notes'
 
-const getAll = async () => {
-  const request = axios.get(baseUrl)
+const getAll = async (query) => {
+  const request = query
+    ? axios.get(`${baseUrl}?content=${query}`)
+    : axios.get(baseUrl)
   const response = await request
   return response.data
 }
